@@ -282,7 +282,7 @@ function renderProdutos() {
                             <button
                                 class="btn-adicionar"
                                 type="button"
-                                onclick="adicionarCarrinho(${produto.id})"
+                                onclick="event.preventDefault(); event.stopPropagation(); adicionarCarrinho(${produto.id});"
                             >
                                 + Adicionar
                             </button>
@@ -694,3 +694,536 @@ localStorage.setItem("carrinho", JSON.stringify(carrinho));
 
 renderProdutos();
 renderCarrinho();
+
+/* ============================================================
+   CARRINHO MOBILE - CORREÇÃO DEFINITIVA
+   ============================================================ */
+
+(function () {
+
+    "use strict";
+
+    function iniciarCarrinhoMobile() {
+
+        /*
+         * IMPORTANTE:
+         * Aqui usamos somente elementos que realmente possuem
+         * identificação de carrinho.
+         *
+         * Não procuramos todos os botões da página.
+         * Isso evita que "+ Adicionar" abra o carrinho.
+         */
+
+        const contadorDesktop =
+            document.getElementById("contadorCarrinho");
+
+        const contadorMobile =
+            document.getElementById("contadorMobile");
+
+        const listaCarrinho =
+            document.getElementById("listaCarrinho");
+
+
+        if (!listaCarrinho) {
+            console.warn(
+                "Carrinho: #listaCarrinho não encontrado."
+            );
+
+            return;
+        }
+
+
+        /*
+         * Descobre o painel do carrinho.
+         */
+
+        let painelCarrinho =
+            listaCarrinho.closest(
+                "#carrinho, #painelCarrinho, .carrinho, .carrinho-painel, .cart-panel, aside"
+            );
+
+
+        /*
+         * Caso não exista um seletor específico,
+         * usamos o elemento pai da lista.
+         */
+
+        if (!painelCarrinho) {
+            painelCarrinho =
+                listaCarrinho.parentElement;
+        }
+
+
+        if (!painelCarrinho) {
+            console.warn(
+                "Carrinho: painel não encontrado."
+            );
+
+            return;
+        }
+
+
+        /*
+         * CSS exclusivo para celular.
+         */
+
+        if (!document.getElementById(
+            "carrinhoMobileStyle"
+        )) {
+
+            const style =
+                document.createElement("style");
+
+            style.id =
+                "carrinhoMobileStyle";
+
+
+            style.textContent = `
+
+                @media (max-width: 768px) {
+
+                    .carrinho-mobile-painel {
+
+                        position: fixed !important;
+
+                        top: 0 !important;
+                        right: 0 !important;
+                        bottom: 0 !important;
+                        left: 0 !important;
+
+                        width: 100% !important;
+                        height: 100dvh !important;
+
+                        max-width: 100% !important;
+                        max-height: 100dvh !important;
+
+                        z-index: 99999 !important;
+
+                        background: #0b0b0b !important;
+
+                        overflow: hidden !important;
+
+                        transform:
+                            translateX(100%) !important;
+
+                        opacity: 0 !important;
+
+                        visibility: hidden !important;
+
+                        transition:
+                            transform .30s ease,
+                            opacity .20s ease,
+                            visibility .30s ease !important;
+                    }
+
+
+                    .carrinho-mobile-painel.aberto {
+
+                        transform:
+                            translateX(0) !important;
+
+                        opacity: 1 !important;
+
+                        visibility: visible !important;
+                    }
+
+
+                    .carrinho-mobile-painel
+                    #listaCarrinho {
+
+                        height: calc(100dvh - 120px) !important;
+
+                        overflow-y: auto !important;
+
+                        -webkit-overflow-scrolling: touch !important;
+                    }
+
+
+                    .carrinho-mobile-fechar {
+
+                        position: absolute !important;
+
+                        top: 12px !important;
+                        right: 12px !important;
+
+                        width: 42px !important;
+                        height: 42px !important;
+
+                        border: none !important;
+
+                        border-radius: 50% !important;
+
+                        background: #E51012 !important;
+
+                        color: #FFFFFF !important;
+
+                        font-size: 28px !important;
+
+                        font-weight: bold !important;
+
+                        line-height: 42px !important;
+
+                        text-align: center !important;
+
+                        padding: 0 !important;
+
+                        z-index: 100001 !important;
+
+                        cursor: pointer !important;
+
+                        touch-action: manipulation !important;
+                    }
+
+
+                    /*
+                     * Impede que o contador interfira
+                     * no clique do botão.
+                     */
+
+                    #contadorCarrinho,
+                    #contadorMobile {
+
+                        pointer-events: none !important;
+                    }
+
+
+                    /*
+                     * Botões de adicionar continuam
+                     * completamente independentes.
+                     */
+
+                    .btn-adicionar {
+
+                        position: relative !important;
+
+                        z-index: 10 !important;
+
+                        pointer-events: auto !important;
+
+                        touch-action: manipulation !important;
+                    }
+
+                }
+
+            `;
+
+
+            document.head.appendChild(style);
+        }
+
+
+        painelCarrinho.classList.add(
+            "carrinho-mobile-painel"
+        );
+
+
+        /*
+         * Cria botão fechar.
+         */
+
+        let botaoFechar =
+            painelCarrinho.querySelector(
+                ".carrinho-mobile-fechar"
+            );
+
+
+        if (!botaoFechar) {
+
+            botaoFechar =
+                document.createElement("button");
+
+            botaoFechar.type =
+                "button";
+
+            botaoFechar.className =
+                "carrinho-mobile-fechar";
+
+            botaoFechar.innerHTML =
+                "×";
+
+            botaoFechar.setAttribute(
+                "aria-label",
+                "Fechar carrinho"
+            );
+
+
+            painelCarrinho.appendChild(
+                botaoFechar
+            );
+        }
+
+
+        /*
+         * Abre o carrinho.
+         */
+
+        function abrirCarrinho() {
+
+            if (
+                window.innerWidth > 768
+            ) {
+                return;
+            }
+
+
+            painelCarrinho.classList.add(
+                "aberto"
+            );
+
+
+            document.body.style.overflow =
+                "hidden";
+        }
+
+
+        /*
+         * Fecha o carrinho.
+         */
+
+        function fecharCarrinho() {
+
+            painelCarrinho.classList.remove(
+                "aberto"
+            );
+
+
+            document.body.style.overflow =
+                "";
+        }
+
+
+        /*
+         * Botão de fechar.
+         */
+
+        botaoFechar.addEventListener(
+            "click",
+            function (event) {
+
+                event.preventDefault();
+
+                event.stopPropagation();
+
+                fecharCarrinho();
+
+            }
+        );
+
+
+        /*
+         * --------------------------------------------------------
+         * LOCALIZA SOMENTE O BOTÃO DO CARRINHO
+         * --------------------------------------------------------
+         *
+         * Não usamos:
+         *
+         * document.querySelectorAll("button")
+         *
+         * porque isso poderia capturar os botões
+         * "+ Adicionar".
+         */
+
+
+        const possiveisBotoes = [
+
+            document.getElementById(
+                "btnCarrinho"
+            ),
+
+            document.getElementById(
+                "carrinhoBtn"
+            ),
+
+            document.getElementById(
+                "botaoCarrinho"
+            ),
+
+            document.getElementById(
+                "abrirCarrinho"
+            ),
+
+            document.getElementById(
+                "cartButton"
+            ),
+
+            document.getElementById(
+                "cartBtn"
+            )
+
+        ].filter(Boolean);
+
+
+        /*
+         * Se o contador estiver dentro do botão,
+         * usamos o botão pai.
+         */
+
+        if (contadorMobile) {
+
+            const botaoPai =
+                contadorMobile.closest(
+                    "button, a, [role='button']"
+                );
+
+
+            if (botaoPai) {
+
+                possiveisBotoes.push(
+                    botaoPai
+                );
+            }
+        }
+
+
+        if (contadorDesktop) {
+
+            const botaoPai =
+                contadorDesktop.closest(
+                    "button, a, [role='button']"
+                );
+
+
+            if (botaoPai) {
+
+                possiveisBotoes.push(
+                    botaoPai
+                );
+            }
+        }
+
+
+        /*
+         * Remove duplicados.
+         */
+
+        const botoesUnicos =
+            [...new Set(possiveisBotoes)];
+
+
+        /*
+         * Adiciona evento somente nos botões
+         * identificados como carrinho.
+         */
+
+        botoesUnicos.forEach(
+            function (botao) {
+
+                if (
+                    botao.dataset
+                        .carrinhoMobileAtivo ===
+                    "true"
+                ) {
+                    return;
+                }
+
+
+                botao.dataset
+                    .carrinhoMobileAtivo =
+                    "true";
+
+
+                botao.addEventListener(
+                    "click",
+                    function (event) {
+
+                        /*
+                         * Só interfere no celular.
+                         */
+
+                        if (
+                            window.innerWidth > 768
+                        ) {
+                            return;
+                        }
+
+
+                        /*
+                         * Impede somente o clique
+                         * do botão do carrinho.
+                         */
+
+                        event.preventDefault();
+
+                        event.stopPropagation();
+
+
+                        if (
+                            painelCarrinho.classList
+                                .contains("aberto")
+                        ) {
+
+                            fecharCarrinho();
+
+                        } else {
+
+                            abrirCarrinho();
+                        }
+
+                    }
+                );
+
+            }
+        );
+
+
+        /*
+         * Fecha ao pressionar ESC.
+         */
+
+        document.addEventListener(
+            "keydown",
+            function (event) {
+
+                if (
+                    event.key === "Escape"
+                ) {
+
+                    fecharCarrinho();
+                }
+
+            }
+        );
+
+
+        /*
+         * Quando voltar para desktop,
+         * remove o estado mobile.
+         */
+
+        window.addEventListener(
+            "resize",
+            function () {
+
+                if (
+                    window.innerWidth > 768
+                ) {
+
+                    fecharCarrinho();
+                }
+
+            }
+        );
+
+    }
+
+
+    /*
+     * Aguarda o HTML carregar.
+     */
+
+    if (
+        document.readyState ===
+        "loading"
+    ) {
+
+        document.addEventListener(
+            "DOMContentLoaded",
+            iniciarCarrinhoMobile
+        );
+
+    } else {
+
+        iniciarCarrinhoMobile();
+    }
+
+})();
