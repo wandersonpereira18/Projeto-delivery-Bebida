@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BOTECO DO RIBA</title>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css">
+    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="styles_login.css">
+    <link rel="icon" type="image/x-icon" href="favicon.icon">
+</head>
+
+<body class="landing">
+    <main class="overlay">
+        <section class="login-card">
+            <header class="card-header">
+                <div class="hero-brand">
+                    <img src="riba (2).png" alt="Boteco do Riba" class="logo-riba">
+                    <div class="titulo-container">
+                        <h1 class="titulo-riba">
+                            <span class="titulo-branco">BOTECO </span>
+                            <span class="titulo-dourado">DO RIBA</span>
+                        </h1>
+                        <div class="linha-dourada"></div>
+                    </div>
+                </div>
+            </header>
+
+
+            <section class="carousel-section">
+                <div class="carousel-track">
+                    <img src="Imagem1.png" alt="">
+                    <img src="Sem título.png" alt="">
+                    <img src="Aniversario.png" alt="">
+                    <img src="feijoda.pnj.png" alt="">
+                    <img src="Cervejas.png" alt="">
+                    <img src="Antarctica.png" alt="">
+                    <img src="bebida_51.png" alt="">
+                    <img src="Feijoada2.png" alt="">
+                    <img src="COPO.png" alt="">
+                    <img src="Rabada.png" alt="">
+
+                    <!-- Repetição para loop infinito -->
+
+                    <img src="Imagem1.png" alt="">
+                    <img src="Sem título.png" alt="">
+                    <img src="Aniversario.png" alt="">
+                    <img src="feijoda.pnj.png" alt="">
+                    <img src="Cervejas.png" alt="">
+                    <img src="Antarctica.png" alt="">
+                    <img src="bebida_51.png" alt="">
+                    <img src="Feijoada2.png" alt="">
+                    <img src="COPO.png" alt="">
+                    <img src="Rabada.png" alt="">
+
+                </div>
+            </section>
+
+            <!-- Formulário -->
+
+            <form id="clienteForm" class="cliente-form">
+                <div class="idade-container">
+                    <label class="checkbox-label"><input type="checkbox" id="idade">Tenho 18 anos ou mais</label>
+                </div>
+
+                <div class="form-group">
+                    <label for="nome">Nome Completo</label>
+                    <input type="text" id="nome" placeholder="Digite seu nome" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="cep">CEP</label>
+                    <input type="text" id="cep" placeholder="00000-000" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="endereco">Endereço</label>
+                    <input type="text" id="endereco" placeholder="Rua, Avenida..." required>
+                </div>
+
+                <div class="row">
+
+                    <div class="form-group">
+                        <label for="numero">Número</label>
+                        <input type="text" id="numero" placeholder="Nº" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="bairro">Bairro</label>
+                        <input type="text" id="bairro" placeholder="Seu bairro" required>
+                    </div>
+
+                </div>
+
+                <div class="form-group">
+                    <label for="referencia">Ponto de Referência</label>
+                    <input type="text" id="referencia" placeholder="Ex.: Próximo à farmácia" required>
+                </div>
+            </form>
+
+            <!-- Mapa -->
+
+            <section class="map-section">
+                <h3>📍 Localização da Entrega</h3>
+                <div id="map"></div>
+            </section>
+
+            <!-- Frete -->
+
+            <section class="frete-info">
+                <div class="info-card">
+                    <span>Distância</span>
+                    <strong id="distancia">
+                        0 km
+                    </strong>
+                </div>
+
+                <div class="info-card">
+                    <span>Taxa de Entrega</span>
+                    <strong id="frete">
+                        R$ 5,00
+                    </strong>
+                </div>
+
+            </section>
+            <button id="entrar" class="btn-primary" disabled>Acessar Cardápio</button>
+        </section>
+    </main>
+
+    <!-- =========================================
+     JANELA DA IMAGEM GRANDE
+========================================= -->
+
+    <div class="image-modal" id="imageModal">
+
+        <span class="fechar" id="fecharImagem">
+            &times;
+        </span>
+
+        <img id="imagemGrande" src="" alt="Imagem ampliada">
+
+    </div>
+
+    <!-- Leaflet -->
+
+    <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+
+    <!-- JS -->
+
+    <script src="app.js"></script>
+</body>
+
+</html>
